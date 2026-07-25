@@ -33,7 +33,7 @@ Legenda de status: ✅ existe · 🕓 a criar quando houver conteúdo real (nunc
 | `vision.md` — visão do Market Intelligence Ecosystem | 🕓 | PM + EM |
 | `principles.md` — princípios de produto e engenharia | 🕓 | EM |
 | `glossary.md` — vocabulário canônico (domínio + técnico) | 🕓 | EM (curadoria) |
-| `contracts.md` — contratos de dados C0–C3 entre os produtos | 🕓 | EM (guardião) |
+| `contracts.md` — contratos de dados C0–C3 entre os produtos | ✅ (C0 validado, C1 `v1.0.0`; C2/C3 🕓) | EM (guardião) |
 | `decisions/` — ADRs (registros de decisão arquitetural) | 🕓 | EM |
 
 ### Camada-ponte — Engenharia (`docs/engineering/`)
@@ -47,7 +47,7 @@ Legenda de status: ✅ existe · 🕓 a criar quando houver conteúdo real (nunc
 |---|---|---|
 | `product-discovery.md` — Discovery aprovada (fonte da visão) | 🕓 | PM |
 | `roadmap.md` — sequência de entrega de valor (MVP → v2 → v3) | 🕓 | PM |
-| `metrics-definitions.md` — definições canônicas dos KPIs | 🕓 | PM (valor) + EM (consistência) |
+| `metrics-definitions.md` — definições canônicas dos KPIs | ✅ (pontualidade `v1.0.0`) | PM (valor) + EM (consistência) |
 
 ### Camada 3 — Repositórios (dentro de cada repo, **não** em `docs/`)
 | Documento | Status | Responsável |
