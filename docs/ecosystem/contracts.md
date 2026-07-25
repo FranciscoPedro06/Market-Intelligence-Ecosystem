@@ -10,7 +10,7 @@ Legenda de status: 🔒 congelado/versionado · 🧪 validado (fonte externa) ·
 |---|---|---|
 | **C0** | Fonte ANAC/VRA → Collector | 🧪 validado na Fase 0 (Sprint 1) |
 | **C1** | Collector → Analytics | 🔒 `v1.0.0` |
-| **C2** | Analytics → API | 🔒 `v1.0.0` |
+| **C2** | Analytics → API | 🔒 `v1.1.0` |
 | **C3** | API → Consumidor | 🕓 Fase 1 |
 
 ---
@@ -83,9 +83,9 @@ Contrato **externo** (não controlamos). Validado por spike contra o dado real (
 
 ---
 
-## C2 — Analytics → API · 🔒 `v1.0.0` (congelado 2026-07-24)
+## C2 — Analytics → API · 🔒 `v1.1.0` (congelado 2026-07-24; emendado 2026-07-25)
 
-> Esquema do **indicador de pontualidade** por **rota (direcional) × companhia × mês**, aplicando exatamente `metrics-definitions.md → pontualidade v1.0.0` sobre o registro bruto `C1 v1.0.0`.
+> Esquema do **indicador de pontualidade** por **rota (direcional) × companhia × mês**, aplicando exatamente `metrics-definitions.md → pontualidade v1.1.0` sobre o registro bruto `C1 v1.0.0`.
 > **Princípio (RT5):** a API **não** calcula nada. O C2 carrega o número já pronto (`on_time_rate`), numerador, denominador, contadores de transparência e linhagem — a API apenas serve.
 > **Origem:** rascunho do Analytics Engineer na Fase 0, revisado e congelado pelo Sprint Lead (ambiguidades R1–R5 resolvidas).
 
@@ -113,20 +113,21 @@ Contrato **externo** (não controlamos). Validado por spike contra o dado real (
 
 | Campo | Tipo | Notas |
 |---|---|---|
-| `flights_operated` | integer (≥0) | **Denominador.** `flight_status = REALIZADO` **E** `actual_arrival` não nulo. |
+| `flights_operated` | integer (≥0) | **Denominador.** `flight_status = REALIZADO` **E** `actual_arrival` não nulo **E** `scheduled_arrival` não nulo. *(v1.1.0: passou a exigir também `scheduled_arrival` — sem previsão, a pontualidade é indefinida.)* |
 | `flights_on_time` | integer (≥0) | **Numerador.** Subconjunto com `(actual_arrival − scheduled_arrival) ≤ 15 min` (antecipado = pontual; +15 inclusivo). |
 | `on_time_rate` | decimal[0,1] (nullable) | `flights_on_time / flights_operated`. **`null` quando denominador = 0** (nunca 0/0). Fração, não percentual; precisão plena (arredondamento é do C3). |
 | `flights_cancelled` | integer (≥0) | Transparência: `CANCELADO`. Fora do denominador (fora de escopo), nunca descartado. |
 | `flights_not_reported` | integer (≥0) | Transparência: `NÃO INFORMADO`. Fora do denominador. |
 | `flights_operated_missing_arrival` | integer (≥0) | Transparência: `REALIZADO` sem `actual_arrival`. Dado ausente explícito. |
-| `flights_source_total` | integer (≥0) | `operated + missing_arrival + cancelled + not_reported`. Fecha a reconciliação (AC4): nenhuma linha C1 some. |
+| `flights_operated_missing_schedule` | integer (≥0) | *(novo em v1.1.0)* Transparência: `REALIZADO` com chegada real mas **sem chegada prevista** — pontualidade **indefinida**. Fora do denominador; **nunca** contado como atrasado. |
+| `flights_source_total` | integer (≥0) | `operated + missing_arrival + missing_schedule + cancelled + not_reported`. Fecha a reconciliação (AC4): nenhuma linha C1 some. |
 
 ### Campos — Proveniência da métrica
 
 | Campo | Tipo | Valor |
 |---|---|---|
 | `metric_id` | string | `pontualidade` |
-| `metric_version` | string | `v1.0.0` |
+| `metric_version` | string | `v1.1.0` |
 | `metric_definition_source` | string | `docs/product/metrics-definitions.md#pontualidade` |
 | `on_time_basis` | string | `arrival` |
 | `on_time_threshold_minutes` | integer | `15` (inclusivo; encodado para a API não reimplementar a regra) |
@@ -148,9 +149,9 @@ Contrato **externo** (não controlamos). Validado por spike contra o dado real (
 
 ### Garantias
 - **Sem lógica na API (RT5):** todo cálculo (IATA, janela 15 min, denominador, taxa) já resolvido no C2. A API filtra e devolve.
-- **Transparência:** `CANCELADO`, `NÃO INFORMADO` e `REALIZADO`-sem-chegada aparecem como contadores; `flights_source_total` prova que nenhuma linha C1 sumiu. Exclusões reportadas, não apagadas.
+- **Transparência:** `CANCELADO`, `NÃO INFORMADO`, `REALIZADO`-sem-chegada-real e `REALIZADO`-sem-chegada-prevista aparecem como contadores próprios; `flights_source_total` prova que nenhuma linha C1 sumiu. Exclusões reportadas, não apagadas.
 - **Nulos nunca inventados:** `on_time_rate = null` se denominador 0; contadores default 0; `airline_name` ausente → `null`.
-- **Reconciliação manual (AC4):** filtrar C1 por (`airline_icao`, rota, `reference_month`) com os `file_sha256` de `source_lineage`, contar `REALIZADO` com `actual_arrival`, aplicar 15 min, dividir → deve bater com `on_time_rate`.
+- **Reconciliação manual (AC4):** filtrar C1 por (`airline_icao`, rota, `reference_month`) com os `file_sha256` de `source_lineage`, contar `REALIZADO` com `actual_arrival` **e** `scheduled_arrival`, aplicar 15 min, dividir → deve bater com `on_time_rate`.
 - **Determinismo (AC5):** mesmo input C1 (mesmos `file_sha256`) + mesmo `analytics_version` → C2 idêntico em todos os campos exceto `computed_at_utc`.
 - **Idempotência / grão:** no máximo um registro por (`route_id`, `airline_icao`, `reference_month`); reprocessar sobrescreve, não duplica.
 
@@ -170,3 +171,4 @@ Perguntas por rota e a comparação de pontualidade entre companhias devolvida. 
 | C0 | — | 2026-07-24 | Validado contra dado real (spike Fase 0). |
 | C1 | `v1.0.0` | 2026-07-24 | Congelamento inicial do registro bruto de voo (Sprint 1, Fase 0). |
 | C2 | `v1.0.0` | 2026-07-24 | Congelamento inicial do indicador de pontualidade (rota direcional × companhia × mês) aplicando `pontualidade v1.0.0` sobre `C1 v1.0.0`. |
+| C2 | `v1.1.0` | 2026-07-25 | Emenda aditiva (CCR do Analytics): denominador passa a exigir `scheduled_arrival`; novo contador de transparência `flights_operated_missing_schedule`; `flights_source_total` inclui o novo bucket. Aplica `pontualidade v1.1.0`. Compatível: nenhum campo removido/renomeado. |

@@ -6,9 +6,9 @@
 
 ---
 
-## Pontualidade (on-time performance) — `v1.0.0`
+## Pontualidade (on-time performance) — `v1.1.0`
 
-**Congelada na Fase 0 da Sprint 1.** Definição usada de ponta a ponta pelo Analytics e servida pela API.
+**Congelada na Fase 0 da Sprint 1; emendada na Fase 2 (CCR do Analytics).** Definição usada de ponta a ponta pelo Analytics e servida pela API.
 
 ### Definição
 
@@ -31,7 +31,7 @@ Para uma **companhia × rota × mês**:
 pontualidade = voos_pontuais / voos_no_denominador
 ```
 
-- **Denominador** = voos **operados** (`Situação Voo = REALIZADO`) que possuem **chegada real** registrada.
+- **Denominador** = voos **operados** (`Situação Voo = REALIZADO`) que possuem **chegada real E chegada prevista** registradas. *(v1.1.0: sem chegada prevista, `pontual(v)` é indefinido — o voo é **não mensurável**, ver Exclusões.)*
 - **Numerador** = subconjunto do denominador que satisfaz `pontual(v)`.
 - Resultado expresso como fração/percentual, com o denominador sempre reportado junto (para reconciliação).
 
@@ -48,11 +48,12 @@ pontualidade = voos_pontuais / voos_no_denominador
 
 - **`CANCELADO`** — cancelamento está **fora do escopo desta Sprint**; não entra no denominador nem é reportado como métrica separada agora. Registrado de forma transparente, nunca como voo pontual/atrasado.
 - **`NÃO INFORMADO`** — status desconhecido; **excluído** do denominador e contabilizado à parte como "não reportado". Nunca descartado silenciosamente nem tratado como operado.
-- Voos `REALIZADO` **sem chegada real** — excluídos do denominador e registrados como dado ausente transparente.
+- Voos `REALIZADO` **sem chegada real** — excluídos do denominador e registrados como dado ausente transparente (`flights_operated_missing_arrival`).
+- Voos `REALIZADO` **sem chegada prevista** — classificados como **não mensuráveis**: `pontual(v)` é indefinido sem o horário de comparação. **Permanecem fora da métrica de pontualidade** (fora do denominador e do numerador) e aparecem **apenas em contadores de transparência** (`flights_operated_missing_schedule`). **Nunca** contados como atrasados nem inventados. *(v1.1.0)*
 
 ### Reconciliação
 
-O número servido pela API para (companhia, rota, mês) deve ser reproduzível manualmente: filtrar o dataset bruto por essa companhia/rota/mês, contar voos com `Situação Voo = REALIZADO` e chegada real, aplicar a regra dos 15 min, dividir. O resultado deve bater com o do Analytics (AC4).
+O número servido pela API para (companhia, rota, mês) deve ser reproduzível manualmente: filtrar o dataset bruto por essa companhia/rota/mês, contar voos com `Situação Voo = REALIZADO` que possuam chegada real **e** chegada prevista, aplicar a regra dos 15 min, dividir. O resultado deve bater com o do Analytics (AC4).
 
 ---
 
@@ -67,3 +68,4 @@ Cancelamento, atraso médio e concentração de mercado **não** são definidos 
 | Versão | Data | Mudança |
 |---|---|---|
 | `v1.0.0` | 2026-07-24 | Congelamento inicial da pontualidade (Sprint 1, Fase 0): chegada, ≤15 min, mensal, denominador = REALIZADO com chegada real; cancelamento fora de escopo. |
+| `v1.1.0` | 2026-07-25 | Emenda (CCR do Analytics, Fase 2): voos `REALIZADO` sem chegada prevista são **não mensuráveis** — excluídos do denominador, apenas em contador de transparência. Corrige a violação de "nulos nunca inventados" do denominador `v1.0.0` (voos indefinidos eram contados como atrasados). |
