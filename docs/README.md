@@ -41,6 +41,7 @@ Legenda de status: ✅ existe · 🕓 a criar quando houver conteúdo real (nunc
 |---|---|---|
 | `engineering-execution-plan.md` — ponte visão → execução | ✅ | EM |
 | `sprints/sprint-01-walking-skeleton.md` — plano da Sprint 1 | ✅ | EM (plano) / Engenheiros (execução) |
+| `sprints/sprint-01-acceptance.md` — registro de aceite da Sprint 1 | ✅ | Sprint Lead |
 
 ### Camada 2 — Produto (`docs/product/`)
 | Documento | Status | Responsável |
@@ -52,9 +53,9 @@ Legenda de status: ✅ existe · 🕓 a criar quando houver conteúdo real (nunc
 ### Camada 3 — Repositórios (dentro de cada repo, **não** em `docs/`)
 | Documento | Status | Responsável |
 |---|---|---|
-| `market-intelligence-collector/README.md` | 🕓 | Eng. do repo |
-| `market-intelligence-api/README.md` | 🕓 | Eng. do repo |
-| `market-intelligence-analytics/README.md` | 🕓 | Eng. do repo |
+| `market-intelligence-collector/README.md` | ✅ | Eng. do repo |
+| `market-intelligence-api/README.md` | ✅ | Eng. do repo |
+| `market-intelligence-analytics/README.md` | ✅ | Eng. do repo |
 
 ---
 
