@@ -83,7 +83,7 @@ Contrato **externo** (não controlamos). Validado por spike contra o dado real (
 
 ---
 
-## C2 — Analytics → API · 🔒 `v1.1.0` (congelado 2026-07-24; emendado 2026-07-25)
+## C2 — Analytics → API · 🔒 `v1.1.0` (congelado 2026-07-24; emendado 2026-07-25; artefato identificado 2026-07-26)
 
 > Esquema do **indicador de pontualidade** por **rota (direcional) × companhia × mês**, aplicando exatamente `metrics-definitions.md → pontualidade v1.1.0` sobre o registro bruto `C1 v1.0.0`.
 > **Princípio (RT5):** a API **não** calcula nada. O C2 carrega o número já pronto (`on_time_rate`), numerador, denominador, contadores de transparência e linhagem — a API apenas serve.
@@ -155,8 +155,25 @@ Contrato **externo** (não controlamos). Validado por spike contra o dado real (
 - **Determinismo (AC5):** mesmo input C1 (mesmos `file_sha256`) + mesmo `analytics_version` → C2 idêntico em todos os campos exceto `computed_at_utc`.
 - **Idempotência / grão:** no máximo um registro por (`route_id`, `airline_icao`, `reference_month`); reprocessar sobrescreve, não duplica.
 
+### Artefato de referência
+
+Este contrato é materializado pelo artefato **`c2_punctuality.json`**.
+
+O nome do artefato **integra a identidade deste contrato**: ele é o ponto de integração entre
+Analytics e API, não um detalhe de execução. Consequência prática — quem abrir apenas este
+documento consegue responder *qual contrato*, *qual versão* e *qual artefato o representa*, sem
+navegar para o plano de engenharia.
+
+Uma mudança desse nome é **mudança de interface** e exige revisão documental deste contrato,
+ainda que o esquema permaneça idêntico campo a campo.
+
+O **formato interno de serialização** do artefato permanece fora do escopo normativo desta
+especificação — ver *Nota de escopo* abaixo. Esta seção estabelece **identidade**, não implementação.
+
+> Ratificado pelo **ADR-0001** (Issue **GOV-002**, 2026-07-26).
+
 ### Nota de escopo
-**Armazenamento, formato de serialização e framework permanecem deferidos** (seção 7 do plano) — este contrato descreve apenas campos, tipos e garantias.
+**Armazenamento, formato de serialização e framework permanecem deferidos** (seção 7 do plano) — este contrato descreve campos, tipos, garantias e a **identidade do artefato** (seção acima), e nada além disso.
 
 ## C3 — API → Consumidor · 🕓 Fase 1
 
@@ -172,3 +189,4 @@ Perguntas por rota e a comparação de pontualidade entre companhias devolvida. 
 | C1 | `v1.0.0` | 2026-07-24 | Congelamento inicial do registro bruto de voo (Sprint 1, Fase 0). |
 | C2 | `v1.0.0` | 2026-07-24 | Congelamento inicial do indicador de pontualidade (rota direcional × companhia × mês) aplicando `pontualidade v1.0.0` sobre `C1 v1.0.0`. |
 | C2 | `v1.1.0` | 2026-07-25 | Emenda aditiva (CCR do Analytics): denominador passa a exigir `scheduled_arrival`; novo contador de transparência `flights_operated_missing_schedule`; `flights_source_total` inclui o novo bucket. Aplica `pontualidade v1.1.0`. Compatível: nenhum campo removido/renomeado. |
+| C2 | `v1.1.0` | 2026-07-26 | **Revisão documental, sem mudança de esquema** (versão inalterada): nova seção *Artefato de referência* fixando `c2_punctuality.json` como identidade do contrato. Ratificado pelo ADR-0001 / GOV-002. Nenhum campo, tipo ou garantia alterado. |

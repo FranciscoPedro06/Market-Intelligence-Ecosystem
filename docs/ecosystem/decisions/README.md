@@ -32,7 +32,7 @@ ADR com `Supera: NNNN`.
 
 | ADR | Título | Status | Data | Decisão adiável (plano §7) |
 |---|---|---|---|---|
-| [0001](0001-artefato-canonico-c2.md) | Artefato canônico do C2 | 🟡 **Proposto** | 2026-07-25 | *Formato dos conjuntos de dados intermediários* |
+| [0001](0001-artefato-canonico-c2.md) | Artefato canônico do C2 | ✅ **Aceito** | 2026-07-26 | *Formato dos conjuntos de dados intermediários* (parcial: identidade) |
 | [0002](0002-envelope-documento-c2.md) | Envelope do documento C2 | 🟡 **Proposto** | 2026-07-25 | *Formato dos conjuntos de dados intermediários* |
 
 Legenda: 🟡 Proposto (aguarda Sprint Lead) · ✅ Aceito · ❌ Rejeitado · ⛔ Superado por outro ADR.

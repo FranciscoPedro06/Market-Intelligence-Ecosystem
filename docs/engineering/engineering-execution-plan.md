@@ -130,7 +130,11 @@ Adiar aqui é disciplina, não preguiça. Nenhuma destas aproxima o MVP hoje.
 
 - ⏳ **Modelo de deployment** dos três produtos (serviços separados, processo único, agendado). *Explicitamente não decidir agora.*
 - ⏳ **Tecnologia de persistência / armazenamento** dos dados brutos e analíticos.
-- ⏳ **Formato dos conjuntos de dados** intermediários.
+- 🟡 **Formato dos conjuntos de dados** intermediários — **parcialmente decidida**. A
+  **identidade do artefato C2** (`c2_punctuality.json`) foi decidida pelo **ADR-0001** (aceito
+  2026-07-26) e vive em `contracts.md` §C2 → *Artefato de referência*. A **forma interna do
+  documento** (envelope) segue adiável — ver ADR-0002, ainda `Proposto`. Serialização,
+  armazenamento e framework permanecem deferidos.
 - ⏳ **Orquestração / agendamento** da cadeia.
 - ⏳ **Protocolo e formato da API** além de "responde à pergunta por rota".
 - ⏳ **Estratégia de carga histórica** (full vs. incremental) e escala de volume.
