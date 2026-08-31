@@ -1,7 +1,7 @@
 # ADR-0002 — Envelope do documento C2
 
-- **Status:** 🟡 **Proposto** — aguarda ratificação do Sprint Lead
-- **Data:** 2026-07-25
+- **Status:** ✅ **Aceito** — ratificado pelo Sprint Lead em 2026-08-31
+- **Data:** 2026-07-25 (proposta) · 2026-08-31 (ratificação)
 - **Decisor:** Sprint Lead (guardião dos contratos)
 - **Proponente:** auditoria de integração do ecossistema (2026-07-25)
 - **Decisão adiável correspondente:** `engineering-execution-plan.md` §7 — *"⏳ Formato dos conjuntos de dados intermediários"*
@@ -54,12 +54,12 @@ está errado: **o contrato não pede envelope nenhum.** Falta a decisão.
 
 ## 3. Decisão
 
-**Recomendação: Opção A — o documento C2 passa a carregar envelope.**
+**Opção A — o documento C2 carrega envelope.**
 
 ```json
 {
   "contract": "C2",
-  "contract_version": "v1.1.0",
+  "contract_version": "v1.2.0",
   "records": [ { "route_id": "SBSP-SBRJ", "…": "…" } ]
 }
 ```
@@ -77,10 +77,40 @@ Três razões, em ordem de peso:
 **Não é breaking change.** `load_c2` já aceita as duas formas (`serve.py:61-68`), então a API
 consome o novo documento sem nenhuma alteração. A mudança é aditiva do lado do produtor.
 
-> **Falta para ratificar:** decidir se `contract_version` é a versão do **contrato** (`v1.1.0`)
-> declarada pelo produtor, ou se o Analytics deve emitir também `analytics_version` no envelope.
-> Recomendação: apenas `contract`/`contract_version` no envelope — `analytics_version` é por
-> registro e já existe.
+### 3.1 O envelope constitui **C2 `v1.2.0`** (decisão de versionamento ratificada)
+
+A questão escalada em §5 — *bump semântico ou refinamento não versionado de `v1.1.0`* — foi
+decidida pelo Sprint Lead: **o envelope é a versão `v1.2.0` do contrato C2**, bump **minor**
+(aditivo, retrocompatível).
+
+Fundamento, e a distinção contra o precedente do ADR-0001:
+
+- O ADR-0001 **não alterou nenhum byte emitido** — nomeou o que já existia. Por isso foi
+  registrado como *revisão documental sem bump*.
+- Este ADR **muda o que o produtor escreve**. Um consumidor passa a poder confiar numa
+  garantia que antes não existia (*"o documento declara qual contrato e qual versão carrega"*).
+  Garantia nova + compatibilidade preservada = **minor**, pela leitura semver que o
+  ecossistema já aplicou ao promover `v1.0.0 → v1.1.0`.
+
+Corolário: **versão de contrato ≠ versão de métrica.** Um documento `C2 v1.2.0` carrega
+registros com `metric_version: v1.1.0`, e isso é correto — o envelope não tocou na
+pontualidade. Era exatamente a confusão que o `metric_version` como proxy de versão de
+contrato produzia (§1).
+
+### 3.2 Conteúdo do envelope: apenas `contract` e `contract_version`
+
+Ratificada a recomendação: o envelope declara **somente** a identidade do contrato.
+`analytics_version`, `metric_version`, `c1_contract_version` e `source_lineage` continuam
+**por registro**. Motivo: são proveniência do *cálculo daquele registro*, não do documento;
+duplicá-los no topo criaria duas fontes para o mesmo fato e um modo de falha novo
+(divergirem entre si).
+
+### 3.3 `D1`/`D2` permanecem `warning` enquanto o array puro for tolerado
+
+O ADR previa avaliar a promoção para `error`. Decisão: **permanecem `warning`**. Elevar agora
+recusaria todo artefato legado no mesmo ato que estabelece a forma canônica — punir o passado
+para inaugurar a regra. O gatilho para a promoção é explícito e fica registrado: **quando o
+array puro deixar de ser tolerado** (uma decisão futura, com seu próprio ADR).
 
 ## 4. Consequências
 
@@ -91,8 +121,21 @@ consome o novo documento sem nenhuma alteração. A mudança é aditiva do lado 
 
 **Negativas / custo aceito**
 - `analyze.py` muda a forma de saída — **a primeira mudança de escrita no produtor desde o freeze
-  do C2**. Exige reexecução e reconferência do artefato (o conteúdo dos registros não muda; o
-  digest do arquivo muda).
+  do C2**. Exige reexecução e reconferência do artefato (nenhuma medida muda; o digest do arquivo
+  muda).
+- **`analytics_version` sobe `1.1.0 → 1.2.0`, e isso altera um campo de cada registro.** Não é
+  cosmético e é obrigatório: a garantia de determinismo do C2 é *"mesmo input C1 + mesmo
+  `analytics_version` → C2 idêntico exceto `computed_at_utc`"*. Manter `1.1.0` faria a mesma
+  versão da lógica produzir dois documentos diferentes (array puro e envelope) — a garantia
+  passaria a ser falsa. Consequência prática: o registro emitido hoje **não** é byte-idêntico ao
+  de 2026-07-25 em `analytics_version`; é idêntico em **todas as 8 medidas e todas as
+  dimensões** (verificado — §6).
+- **Terceira versão do C2 em ~5 semanas.** É movimento em documento de Tier 3
+  (`documentation-architecture.md` §6), que deveria mudar por revisão de contrato, não por
+  rodada. Aceito porque cada bump veio de um defeito real encontrado contra dado real
+  (`v1.1.0`: voo não mensurável no denominador; `v1.2.0`: gate de versão inerte) — mas é sinal
+  a observar: se o C2 bumpar de novo antes da Fase 1, o problema não são os bumps, é o contrato
+  ter sido congelado antes de existir consumidor.
 - Todo artefato C2 existente passa a ser forma legada. Mitigação: a API continua aceitando array
   puro, então nada quebra — mas o `contracts.md` deve dizer qual é a forma canônica e qual é tolerada.
 - `RECONCILIATION.md` e o exemplo do README da API precisam ser reconferidos (o conteúdo servido
@@ -102,13 +145,16 @@ consome o novo documento sem nenhuma alteração. A mudança é aditiva do lado 
 
 | Alvo | Mudança |
 |---|---|
-| `docs/ecosystem/contracts.md` §C2 | Nova subseção *Forma do documento*: envelope canônico + array puro tolerado como legado; atualizar a *Nota de escopo* |
-| `docs/ecosystem/contracts.md` — Histórico de versões | Avaliar se o envelope é **C2 `v1.2.0`** (aditivo, nível documento) ou refinamento não versionado de `v1.1.0`. **Questão para o Sprint Lead** — a auditoria não decide isso |
-| `docs/engineering/engineering-execution-plan.md` §7 | Marcar *"Formato dos conjuntos de dados intermediários"* como decidida (ADR-0001 + ADR-0002) |
-| `market-intelligence-analytics/src/analyze.py` | Emitir envelope; `README.md` refletir a nova forma |
-| `market-intelligence-api/src/c2_validation.py` | Nenhuma mudança de lógica. Avaliar se `D1`/`D2` sobem de `warning` para `error` quando o envelope passar a ser obrigatório |
-| `market-intelligence-api/README.md` | Remover a *Observação para o Analytics*; atualizar `C2=None` no exemplo |
-| `docs/engineering/sprints/sprint-01-acceptance.md` §6 | Follow-up *"Envelope de C2"* → resolvido por este ADR (coordenar com **GOV-001**) |
+| `docs/ecosystem/contracts.md` §C2 | ✅ Nova seção *Forma do documento*: envelope canônico + array puro tolerado como legado; *Nota de escopo* ajustada |
+| `docs/ecosystem/contracts.md` — Histórico de versões | ✅ Decidido em §3.1: **C2 `v1.2.0`** (bump minor, aditivo, nível documento). Linha registrada no histórico |
+| `docs/ecosystem/decisions/README.md` | ✅ Índice: ADR-0002 → `Aceito` |
+| `docs/README.md` | ✅ Índice (I5): C2 `v1.2.0` |
+| `docs/engineering/engineering-execution-plan.md` §7 | ✅ *"Formato dos conjuntos de dados intermediários"* → **decidida** (ADR-0001 identidade + ADR-0002 forma). Armazenamento e framework seguem adiados |
+| `market-intelligence-analytics/src/analyze.py` | ✅ `build_document()` emite o envelope; `ANALYTICS_VERSION → 1.2.0` (§4); `README.md` reflete a nova forma |
+| `market-intelligence-api/src/c2_validation.py` | ✅ `SUPPORTED_C2_VERSIONS` inclui `v1.2.0`. Severidade de `D1`/`D2` **inalterada** — ver §3.3 |
+| `market-intelligence-api/tests/self_test.py` | ✅ Nova classe `TestC2DocumentEnvelope` (5 casos) + o teste contra o C2 real passa a exigir envelope declarado. 54 → 60 casos |
+| `market-intelligence-api/README.md` | ✅ *Observação para o Analytics* removida (resolvida); exemplo mostra `C2=v1.2.0` / `pass` |
+| `docs/engineering/sprints/sprint-01-acceptance.md` §6 | ⏳ **Não tocado aqui.** O follow-up *"Envelope de C2"* está resolvido de fato, mas a forma admissível de editar um registro de aceite depende de **GOV-006** (é log append-only ou derivado?), que precede **GOV-001**. Registrar em ADR e não editar o log é a leitura conservadora de **I4** |
 
 ## 6. Rastreabilidade
 
@@ -117,5 +163,28 @@ consome o novo documento sem nenhuma alteração. A mudança é aditiva do lado 
 - Registro anterior do problema: `api/README.md` (*Observação para o Analytics*) e
   `sprint-01-acceptance.md` §6 — onde estava classificado como *"cosmético"*. Este ADR
   **discorda dessa classificação**: o efeito é a inutilização de um gate de contrato.
-- Verificação: `python src/serve.py --input …/c2_punctuality.json --route CGH-SDU --month 2023-06`
-  → `C2=None`, `pass_with_warnings`, 2 avisos (`D1`, `D2`).
+- Verificação **antes** (2026-07-25): `python src/serve.py --input …/c2_punctuality.json --route
+  CGH-SDU --month 2023-06` → `C2=None`, `pass_with_warnings`, 2 avisos (`D1`, `D2`).
+
+### Ratificação — 2026-08-31 (Sprint Lead)
+
+Decidido: **Opção A**, versionada como **C2 `v1.2.0`** (§3.1), envelope restrito a
+`contract`/`contract_version` (§3.2), `D1`/`D2` seguem `warning` (§3.3).
+
+Evidência da execução, contra o C1 real (9.527 linhas, CGH↔SDU, abr–jun/2023):
+
+| Verificação | Resultado |
+|---|---|
+| Mesmo comando de antes, após a mudança | `C2=v1.2.0` · `pass (25 valid, 0 quarantined, 0 error, **0 warning**)` |
+| Nenhum número se moveu | 25 registros comparados campo a campo com o artefato de 2026-07-25: **0 diferenças** fora de `analytics_version` e `computed_at_utc` |
+| Determinismo (AC5) preservado | duas execuções com o mesmo `--computed-at` → sha256 idêntico (`8d912cdb…`) |
+| Suíte da API | 60/60 casos (era 54/54); os 6 novos exercitam o envelope, o legado e a recusa por versão desconhecida |
+| Gate `D2` deixa de ser inerte | documento com `contract_version: v9.9.9` dentro do envelope → `refused`, 0 registros servidos (teste `test_unsupported_version_in_an_envelope_refuses_the_document`) |
+
+O último item é o que justificava o ADR: o gate existia e nunca podia disparar em produção.
+
+**Efeito colateral registrado:** a correção fecha parte da **GOV-004** (as referências a
+`C2 v1.0.0` em `analyze.py`, `c2_validation.py` e `serve.py:520` — esta última visível ao
+consumidor em `GET /` e `GET /meta`). A GOV-004 **permanece aberta** para o restante
+(`collector/EVIDENCE.md`, `CONTRACT-CHANGE-REQUEST.md` §1, `hashlib` no README do Analytics,
+timestamps de `RECONCILIATION.md` e `PROVENANCE.md`).

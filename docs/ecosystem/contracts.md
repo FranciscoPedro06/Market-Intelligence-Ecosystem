@@ -10,7 +10,7 @@ Legenda de status: 🔒 congelado/versionado · 🧪 validado (fonte externa) ·
 |---|---|---|
 | **C0** | Fonte ANAC/VRA → Collector | 🧪 validado na Fase 0 (Sprint 1) |
 | **C1** | Collector → Analytics | 🔒 `v1.0.0` |
-| **C2** | Analytics → API | 🔒 `v1.1.0` |
+| **C2** | Analytics → API | 🔒 `v1.2.0` |
 | **C3** | API → Consumidor | 🕓 Fase 1 |
 
 ---
@@ -83,7 +83,7 @@ Contrato **externo** (não controlamos). Validado por spike contra o dado real (
 
 ---
 
-## C2 — Analytics → API · 🔒 `v1.1.0` (congelado 2026-07-24; emendado 2026-07-25; artefato identificado 2026-07-26)
+## C2 — Analytics → API · 🔒 `v1.2.0` (congelado 2026-07-24; emendado 2026-07-25; artefato identificado 2026-07-26; envelope 2026-08-31)
 
 > Esquema do **indicador de pontualidade** por **rota (direcional) × companhia × mês**, aplicando exatamente `metrics-definitions.md → pontualidade v1.1.0` sobre o registro bruto `C1 v1.0.0`.
 > **Princípio (RT5):** a API **não** calcula nada. O C2 carrega o número já pronto (`on_time_rate`), numerador, denominador, contadores de transparência e linhagem — a API apenas serve.
@@ -167,13 +167,55 @@ navegar para o plano de engenharia.
 Uma mudança desse nome é **mudança de interface** e exige revisão documental deste contrato,
 ainda que o esquema permaneça idêntico campo a campo.
 
-O **formato interno de serialização** do artefato permanece fora do escopo normativo desta
-especificação — ver *Nota de escopo* abaixo. Esta seção estabelece **identidade**, não implementação.
+Esta seção estabelece **identidade**, não implementação. A **forma do documento** que carrega os
+registros é especificada na seção seguinte; **armazenamento e framework** permanecem deferidos —
+ver *Nota de escopo*.
 
 > Ratificado pelo **ADR-0001** (Issue **GOV-002**, 2026-07-26).
 
+### Forma do documento · normativa a partir de `v1.2.0`
+
+As seções acima especificam os campos **de cada registro**. Esta especifica o **documento** que
+os carrega — a lacuna que produtor e consumidor preencheram de formas incompatíveis até 2026-08-31.
+
+**Forma canônica** (`v1.2.0`): objeto com envelope, nesta ordem de chaves.
+
+```json
+{
+  "contract": "C2",
+  "contract_version": "v1.2.0",
+  "records": [ { "route_id": "SBSP-SBRJ", "…": "…" } ]
+}
+```
+
+| Campo do envelope | Tipo | Valor | Propósito |
+|---|---|---|---|
+| `contract` | string | `C2` | O documento declara **qual** contrato carrega. |
+| `contract_version` | string | `v1.2.0` | O documento declara **qual versão** carrega. |
+| `records` | array\<objeto\> | registros C2 | Os registros especificados acima; ordem estável (`route_id`, `airline_icao`, `reference_month`). |
+
+**Regras**
+
+- O envelope declara **apenas a identidade do contrato**. Proveniência de cálculo
+  (`analytics_version`, `metric_version`, `c1_contract_version`, `source_lineage`) é **por
+  registro** e não se duplica no topo — duas fontes para o mesmo fato criam um modo de falha novo.
+- **Versão do contrato ≠ versão da métrica.** Um documento `C2 v1.2.0` carrega registros com
+  `metric_version: v1.1.0` — correto: o envelope não toca na pontualidade.
+- **Forma legada tolerada:** um array JSON puro (`[ {...}, {...} ]`) continua sendo consumível
+  — é o que os artefatos anteriores a 2026-08-31 contêm. Um documento legado **não declara** o
+  que carrega, então o consumidor **deve** registrar essa degradação (na API: avisos `D1`/`D2`),
+  jamais aceitá-la em silêncio.
+- **Por que isto é normativo.** Sem versão declarada, a única defesa contra consumir um C2 de
+  versão não suportada é inerte: não há o que comparar. Um contrato versionado cujo consumidor
+  não consegue ler a versão do documento não está versionado na prática.
+
+> Ratificado pelo **ADR-0002** (Issue **GOV-003**, 2026-08-31).
+
 ### Nota de escopo
-**Armazenamento, formato de serialização e framework permanecem deferidos** (seção 7 do plano) — este contrato descreve campos, tipos, garantias e a **identidade do artefato** (seção acima), e nada além disso.
+**Armazenamento e framework permanecem deferidos** (seção 7 do plano). Este contrato descreve
+campos, tipos, garantias, a **identidade do artefato** e a **forma do documento** (seções acima),
+e nada além disso — em particular, não diz *onde* o artefato é persistido nem *por qual
+tecnologia* é produzido.
 
 ## C3 — API → Consumidor · 🕓 Fase 1
 
@@ -190,3 +232,4 @@ Perguntas por rota e a comparação de pontualidade entre companhias devolvida. 
 | C2 | `v1.0.0` | 2026-07-24 | Congelamento inicial do indicador de pontualidade (rota direcional × companhia × mês) aplicando `pontualidade v1.0.0` sobre `C1 v1.0.0`. |
 | C2 | `v1.1.0` | 2026-07-25 | Emenda aditiva (CCR do Analytics): denominador passa a exigir `scheduled_arrival`; novo contador de transparência `flights_operated_missing_schedule`; `flights_source_total` inclui o novo bucket. Aplica `pontualidade v1.1.0`. Compatível: nenhum campo removido/renomeado. |
 | C2 | `v1.1.0` | 2026-07-26 | **Revisão documental, sem mudança de esquema** (versão inalterada): nova seção *Artefato de referência* fixando `c2_punctuality.json` como identidade do contrato. Ratificado pelo ADR-0001 / GOV-002. Nenhum campo, tipo ou garantia alterado. |
+| C2 | `v1.2.0` | 2026-08-31 | **Emenda aditiva no nível do documento** (ADR-0002 / GOV-003): o artefato passa a carregar o envelope `{contract, contract_version, records[]}`, tornando-se auto-descritivo. **Esquema do registro inalterado** em relação a `v1.1.0` — nenhum campo, tipo, medida ou garantia de registro mudou, e `metric_version` segue `v1.1.0`. Array JSON puro tolerado como forma legada. Compatível: um documento `v1.0.0`/`v1.1.0` continua servível. |

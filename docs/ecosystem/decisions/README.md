@@ -27,13 +27,22 @@ ADR com `Supera: NNNN`.
 > campo mutável. A exceção acima é a leitura operacional adotada nestes primeiros ADRs e
 > precisa de ratificação explícita do Sprint Lead — ou o I4 admite o campo `Status`, ou
 > ADRs só nascem já `Aceito` e a fase de proposta vive fora do log.
+>
+> Na ratificação do ADR-0002 (2026-08-31) a leitura foi aplicada uma segunda vez, e a
+> prática já excede o que a ressalva descreve: além do `Status`, a seção *Decisão* de um
+> ADR `Proposto` é convertida de **recomendação** em **decisão** ao ser aceita (ADR-0001
+> §3.1, ADR-0002 §3.1–3.3). Isso é deliberado — um ADR aceito deve ler-se como decisão,
+> não como sugestão — mas **amplia** a exceção pedida a GOV-006: a ratificação deve
+> decidir sobre a *transição proposta → aceita* como um todo, não só sobre o campo
+> `Status`. Nada é reescrito **depois** de `Aceito`; a imutabilidade pós-aceite segue
+> intacta.
 
 ## Índice
 
 | ADR | Título | Status | Data | Decisão adiável (plano §7) |
 |---|---|---|---|---|
 | [0001](0001-artefato-canonico-c2.md) | Artefato canônico do C2 | ✅ **Aceito** | 2026-07-26 | *Formato dos conjuntos de dados intermediários* (parcial: identidade) |
-| [0002](0002-envelope-documento-c2.md) | Envelope do documento C2 | 🟡 **Proposto** | 2026-07-25 | *Formato dos conjuntos de dados intermediários* |
+| [0002](0002-envelope-documento-c2.md) | Envelope do documento C2 | ✅ **Aceito** | 2026-08-31 | *Formato dos conjuntos de dados intermediários* (fecha a decisão: forma do documento) |
 
 Legenda: 🟡 Proposto (aguarda Sprint Lead) · ✅ Aceito · ❌ Rejeitado · ⛔ Superado por outro ADR.
 

@@ -33,8 +33,8 @@ Legenda de status: ✅ existe · 🕓 a criar quando houver conteúdo real (nunc
 | `vision.md` — visão do Market Intelligence Ecosystem | 🕓 | PM + EM |
 | `principles.md` — princípios de produto e engenharia | 🕓 | EM |
 | `glossary.md` — vocabulário canônico (domínio + técnico) | 🕓 | EM (curadoria) |
-| `contracts.md` — contratos de dados C0–C3 entre os produtos | ✅ (C0 validado, C1 `v1.0.0`, C2 `v1.1.0`; C3 🕓) | EM (guardião) |
-| `decisions/` — ADRs (registros de decisão arquitetural) | 🕓 | EM |
+| `contracts.md` — contratos de dados C0–C3 entre os produtos | ✅ (C0 validado, C1 `v1.0.0`, C2 `v1.2.0`; C3 🕓) | EM (guardião) |
+| `decisions/` — ADRs (registros de decisão arquitetural) | ✅ (ADR-0001 e ADR-0002 aceitos) | EM |
 
 ### Camada-ponte — Engenharia (`docs/engineering/`)
 | Documento | Status | Responsável |
