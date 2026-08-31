@@ -40,8 +40,8 @@ Legenda de status: ✅ existe · 🕓 a criar quando houver conteúdo real (nunc
 | Documento | Status | Responsável |
 |---|---|---|
 | `engineering-execution-plan.md` — ponte visão → execução | ✅ | EM |
-| `sprints/sprint-01-walking-skeleton.md` — plano da Sprint 1 | ✅ | EM (plano) / Engenheiros (execução) |
-| `sprints/sprint-01-acceptance.md` — registro de aceite da Sprint 1 | ✅ | Sprint Lead |
+| `sprints/sprint-01-walking-skeleton.md` — plano da Sprint 1 (**derivado**, editável) | ✅ | EM (plano) / Engenheiros (execução) |
+| `sprints/sprint-01-acceptance.md` — registro de aceite da Sprint 1 (**log append-only**: corrige-se por adendo, nunca no corpo — GOV-006) | ✅ | Sprint Lead |
 
 ### Camada 2 — Produto (`docs/product/`)
 | Documento | Status | Responsável |

@@ -17,25 +17,23 @@ Consequências disso:
 - **Imutável (I4).** O corpo de um ADR aceito **não é reescrito** — é **superado** por um ADR posterior que o referencia.
 - **Toda decisão adiável tomada precisa de ADR.** Se a seção 7 do `engineering-execution-plan.md` marca algo como decidido e não existe ADR, a governança está inconsistente.
 
-### A única exceção à imutabilidade
+### Quando um ADR ainda pode mudar — o selo
 
-O campo **`Status`** é o único mutável, e apenas na transição `Proposto → Aceito` (ou
-`Proposto → Rejeitado`). Depois de `Aceito`, nada mais muda: uma reversão gera um **novo**
-ADR com `Supera: NNNN`.
+Regra ratificada em 2026-08-31 (**GOV-006** item 3), especificada em
+`documentation-architecture.md` **§7 → I4.1**:
 
-> ⚠️ **Questão aberta de governança (GOV-006):** o I4 declara logs imutáveis sem prever
-> campo mutável. A exceção acima é a leitura operacional adotada nestes primeiros ADRs e
-> precisa de ratificação explícita do Sprint Lead — ou o I4 admite o campo `Status`, ou
-> ADRs só nascem já `Aceito` e a fase de proposta vive fora do log.
->
-> Na ratificação do ADR-0002 (2026-08-31) a leitura foi aplicada uma segunda vez, e a
-> prática já excede o que a ressalva descreve: além do `Status`, a seção *Decisão* de um
-> ADR `Proposto` é convertida de **recomendação** em **decisão** ao ser aceita (ADR-0001
-> §3.1, ADR-0002 §3.1–3.3). Isso é deliberado — um ADR aceito deve ler-se como decisão,
-> não como sugestão — mas **amplia** a exceção pedida a GOV-006: a ratificação deve
-> decidir sobre a *transição proposta → aceita* como um todo, não só sobre o campo
-> `Status`. Nada é reescrito **depois** de `Aceito`; a imutabilidade pós-aceite segue
-> intacta.
+> Um ADR é **selado na aceitação**. Enquanto `Proposto`, é rascunho dentro do log; a partir de
+> `Aceito` (ou `Rejeitado`), nada muda.
+
+A transição `Proposto → Aceito` pode alterar:
+
+- o campo **`Status`**;
+- a **Data** (passa a registrar *proposta* e *ratificação*);
+- a seção **3. Decisão** — convertida de *recomendação* em *decisão*, com as subseções que
+  registram o que o decisor resolveu (ver ADR-0001 §3.1, ADR-0002 §3.1–3.3).
+
+**Contexto** e **Opções consideradas** não são reescritos: o registro do que se sabia ao propor é
+o que dá valor ao ADR. Depois do selo, uma reversão gera um **novo** ADR com `Supera: NNNN`.
 
 ## Índice
 
