@@ -211,6 +211,26 @@ os carrega — a lacuna que produtor e consumidor preencheram de formas incompat
 
 > Ratificado pelo **ADR-0002** (Issue **GOV-003**, 2026-08-31).
 
+#### Produtor canônico × consumidor tolerante — três níveis distintos
+
+*Aceitar* um formato, *produzi-lo* e *exigi-lo num teste* são obrigações diferentes. Confundi-las
+foi o que permitiu que um artefato obsoleto fosse publicado como se fosse vigente (**GOV-005**).
+
+| Nível | Obrigação | Sujeito |
+|---|---|---|
+| **1. Produzido pelo pipeline canônico** | O produtor vigente (`market-intelligence-analytics`) **deve** emitir a **versão vigente** do C2 — hoje o envelope `v1.2.0`. Emitir forma anterior é defeito do produtor, não escolha de estilo. | Analytics |
+| **2. Aceito por compatibilidade** | O consumidor **deve** continuar lendo `v1.0.0`, `v1.1.0` e o array puro pré-envelope. Retrocompatibilidade é garantia do contrato e **não** é revogada por este registro. | API |
+| **3. Exigido pelo teste de integração** | Um teste de integração contra o C2 **real** deve verificar o nível 1, não o nível 2: ele afirma *"o produtor vizinho está atualizado"*. | Suíte da API |
+
+**Corolário operacional.** *Tolerar* uma forma nunca autoriza *publicá-la como vigente*. Um
+consumidor que sirva um documento abaixo da versão vigente deve exigir escolha explícita de quem
+opera (na API: `--allow-legacy`) e sinalizar a escolha na saída. O silêncio é o que se proíbe —
+não o formato.
+
+> Registrado em 2026-08-31 pela **GOV-005**. **Não é emenda de esquema:** nenhum campo, tipo,
+> medida ou garantia mudou, e o C2 permanece em **`v1.2.0`**. Esta subseção escreve uma política
+> que já era imposta por teste sem estar em lugar nenhum.
+
 ### Nota de escopo
 **Armazenamento e framework permanecem deferidos** (seção 7 do plano). Este contrato descreve
 campos, tipos, garantias, a **identidade do artefato** e a **forma do documento** (seções acima),
