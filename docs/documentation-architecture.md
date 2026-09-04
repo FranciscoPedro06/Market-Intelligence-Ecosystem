@@ -41,8 +41,11 @@ Market-Intelligence-Ecosystem/
 │   └── README.md
 ├── market-intelligence-api/
 │   └── README.md
-└── market-intelligence-analytics/
-    └── README.md
+├── market-intelligence-analytics/
+│   └── README.md
+└── market-intelligence-audit/                # instrumento de auditoria (NÃO é produto)
+    ├── README.md                             # fora da cadeia de valor; ver I9.1
+    └── REPRODUCTIONS.md                      # log append-only de reproduções
 ```
 
 ---
@@ -196,6 +199,9 @@ Regras que, se violadas, indicam que a documentação parou de funcionar como si
 - **I7** — Contrato é governança do ecossistema; nenhum repo é dono de contrato compartilhado.
 - **I8** — Todo aceite de Sprint declara **explicitamente** as versões de contrato e de métrica sob
   as quais foi verificado. Sem isso, o registro não é auditável e o adendo não tem o que superar.
+- **I9** — Toda **evidência de reconciliação** possui **instrumento versionado, reproduzível e
+  independente do código auditado**. Número registrado sem instrumento é afirmação, não evidência.
+  Ver **I9.1** para como isso opera.
 
 ### I4.1 — Selo no estado final (ratificado 2026-08-31, Issue GOV-006 item 3)
 
@@ -223,3 +229,80 @@ spike só por **adendo** ao final do próprio arquivo. Em nenhum caso se edita o
 > Esta subseção fecha a ressalva que vivia em `ecosystem/decisions/README.md` e que descrevia a
 > exceção como sendo apenas do campo `Status` — a prática dos dois primeiros ADRs já era mais
 > ampla que isso, e a regra agora diz o que de fato se faz.
+
+### I9.1 — Instrumentos de evidência (ratificado 2026-09-03, Issue GOV-008)
+
+O I4.1 protege o **registro** da evidência. O I9 protege a **capacidade de refazê-la**. São
+problemas distintos: um número datado pode estar perfeitamente preservado e, ainda assim, ser
+impossível de verificar — foi o que a GOV-008 encontrou.
+
+> **Regra:** um documento que registra reconciliação só está completo quando existe, versionado,
+> o instrumento que a produz. **Número sem instrumento é afirmação; número com instrumento é
+> evidência.**
+
+#### Onde os instrumentos vivem
+
+| Instrumento | Sede | Verifica |
+|---|---|---|
+| **A — recontador independente** | `market-intelligence-analytics/tests/reconcile_independent.py` | `RECONCILIATION.md` §3 — recontagem do C2 a partir do C1 |
+| **B — auditor RAW** | `market-intelligence-audit/` (**repositório próprio**) | `sprint-01-acceptance.md` §3 — triangulação RAW = C2 = API |
+
+A sede do **B** é um repositório à parte por decisão da GOV-008 (opção B2): ele audita os três
+produtos e não pode ser hospedado por nenhum deles sem virar cliente do código que verifica.
+O **A** audita um único produto e vive dentro dele — sede não compromete independência; **importar
+o código auditado é o que compromete**.
+
+#### Como são executados
+
+```bash
+# A — recontagem independente (e comparação opcional contra o C2)
+cd market-intelligence-analytics && python tests/reconcile_independent.py \
+    --c1 input/c1_flights.csv --c2 output/c2_punctuality.json
+
+# B — triangulação RAW = C2 = API
+cd market-intelligence-audit && python src/audit_raw_triangulation.py
+```
+
+#### Como a independência é garantida
+
+Por **verificação mecânica**, não por convenção — em duas camadas, porque uma só é contornável:
+
+1. **Estática (AST):** recusa import direto do código auditado **e** import dinâmico
+   (`importlib`, `__import__`). Import dinâmico não é proibido por ser ruim, e sim por tornar a
+   garantia **inauditável** — e garantia inauditável não é garantia.
+2. **Runtime:** o instrumento roda em subprocesso com um `meta_path` que **levanta exceção** se o
+   módulo auditado for importado **em qualquer profundidade**. É a camada que pega dependência
+   indireta, que a inspeção estática não alcança.
+
+Testes: `analytics/tests/test_independence.py` e `audit/tests/self_test.py`. A consequência é
+falha dura: um instrumento que perdeu a independência é **pior** que nenhum instrumento, porque
+produz números confiantes sem verificação atrás.
+
+#### Insumos não versionados
+
+Os instrumentos consomem dados que **não estão** no Git e não devem estar: o VRA bruto da ANAC
+(~22 MB por mês) e os artefatos de `input/`/`output/`. Regras:
+
+- **ausência de insumo em execução explicitamente solicitada é FALHA**, nunca `SKIP` — o mesmo
+  princípio ratificado na GOV-005;
+- a mensagem de falha nomeia o arquivo ausente, onde ele deve estar e **como obtê-lo**;
+- nada é impresso: uma execução que não leu o insumo **não verificou nada** e não pode produzir
+  evidência;
+- **download automático da fonte externa não é implementado** — o instrumento instrui, uma
+  pessoa obtém.
+
+#### Como a evidência histórica é tratada
+
+Reprodução **nunca** reescreve o registro original (I4). O resultado de cada execução sobre
+evidência já publicada é registrado por acréscimo em
+`market-intelligence-audit/REPRODUCTIONS.md`, com instrumento, versão, insumos por digest,
+resultado e data.
+
+- **Coincidiu** → registra-se que a evidência foi reproduzida independentemente.
+- **Divergiu** → preserva-se o número original e registra-se a divergência como **evento de
+  governança**, identificando o campo divergente. Divergência **não** é classificada
+  automaticamente como erro histórico: pode ser mudança de insumo, de definição ou de método.
+
+> Concordância de resultado não é identidade de método. Uma reprodução bem-sucedida prova que o
+> número é **alcançável hoje** por caminho independente — não que o caminho original fosse este.
+> É exatamente por isso que o I9 exige o instrumento, e não apenas o número.

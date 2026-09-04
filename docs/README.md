@@ -57,6 +57,13 @@ Legenda de status: ✅ existe · 🕓 a criar quando houver conteúdo real (nunc
 | `market-intelligence-api/README.md` | ✅ | Eng. do repo |
 | `market-intelligence-analytics/README.md` | ✅ | Eng. do repo |
 
+### Instrumentos de auditoria (fora da cadeia de valor)
+| Documento | Status | Responsável |
+|---|---|---|
+| `market-intelligence-audit/README.md` — auditor RAW independente (**I9**, GOV-008) | ✅ | Sprint Lead |
+| `market-intelligence-audit/REPRODUCTIONS.md` — log de reproduções de evidência | ✅ | Sprint Lead |
+| `market-intelligence-analytics/tests/reconcile_independent.py` — recontador independente | ✅ | Eng. do repo |
+
 ---
 
 ## Regras de governança da documentação
