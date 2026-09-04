@@ -162,8 +162,65 @@ Quando um documento muda, ele **força a revisão** dos que dependem dele (a jus
 | **Uma decisão adiável é tomada** | novo ADR em `decisions/` + marcar como decidida na seção 7 do engineering-execution-plan. |
 | **Um spike conclui** | nova entrada em `spikes/` + atualizar premissas/riscos no engineering-execution-plan. |
 | **Um contrato ou métrica é versionado** | além da cascata acima: **varrer `sprints/*-acceptance.md` por citações da versão antiga**. Cada registro afetado recebe um **adendo** (nunca edição do corpo — §2.1). Um aceite que cita versão superada sem adendo é violação de I5. |
+| **Uma descontinuação é ratificada** | a entrada de log que a declara (ADR ou aceite) registra o fato — **sede permanente** — e cada `<repo>/README` afetado recebe um **aviso datado, com condição de encerramento escrita nele** (§5.1). Sem registro em log, o aviso não nasce. |
+| **Um aviso de descontinuação atinge sua condição de encerramento** | remover o aviso do `<repo>/README` **na mesma mudança** que remove a última ocorrência governável. **Nenhum registro novo** — o log já carrega o fato e o commit carrega a data (§5.1). |
 
 **Direção da propagação:** sempre montante → jusante. Nunca se altera uma autoridade para "encaixar" um derivado — se o derivado não cabe, ou a fonte muda conscientemente, ou o derivado está errado.
+
+### 5.1 — Avisos de descontinuação (ratificado 2026-09-04, Issue GOV-007)
+
+A auditoria da **GOV-004** não conseguiu classificar a nota sobre `c2_on_time.csv` no
+`api/README.md` — foi o seu único item **E — incerto**. Não faltava fato: faltava regra. A nota
+não carregava data nem condição de encerramento, então ninguém conseguia dizer se ainda valia.
+**Um aviso que não pode ser julgado obsoleto nunca o é** — apenas acumula.
+
+#### Aviso de descontinuação × tolerância vigente
+
+A distinção precede a regra, porque sem ela a primeira aplicação apaga retrocompatibilidade ratificada:
+
+| | **Aviso de descontinuação** | **Tolerância vigente** |
+|---|---|---|
+| Descreve | algo que **não existe mais**: nenhum produtor emite, nenhum consumidor lê | uma **capacidade viva**: o consumidor de fato aceita a forma antiga hoje |
+| Exemplo | `c2_on_time.csv` (ADR-0001 §3) | C2 `v1.0.0`, `v1.1.0` e array puro, aceitos pela API (GOV-005) |
+| Sede | log (permanente) + eco temporário no `<repo>/README` | `contracts.md` + `<repo>/README`, enquanto o comportamento existir |
+| Encerra | pelo ciclo de vida abaixo | quando o comportamento é revogado — decisão de **contrato**, não de documentação |
+
+> Esta regra **não alcança tolerância vigente**. Remover a documentação de uma retrocompatibilidade
+> que ainda funciona não é aposentar um aviso: é esconder comportamento.
+
+#### Ciclo de vida do aviso
+
+1. **Nasce em log.** Uma descontinuação é declarada em entrada de log — ADR ou aceite de Sprint —
+   e **o log é a sede permanente do fato**. Sem essa entrada, o aviso não nasce: um aviso sem log
+   atrás desaparece inteiro ao expirar, e o que se perde é justamente o registro de que algo foi
+   descontinuado. Documento derivado não é sede permanente de fato histórico (§2).
+2. **Ecoa no derivado.** Cada `<repo>/README` afetado recebe um aviso **datado** e com **condição
+   de encerramento explícita, escrita nele**. Aviso sem condição de encerramento viola **I10**.
+3. **Vive enquanto o nome for governado.** A condição de encerramento padrão: o nome descontinuado
+   ainda aparece em algo que o repositório governa — comando documentado, código, teste, fixture
+   ou artefato versionado. **Diretório de trabalho não conta.** O repositório não observa a máquina
+   de ninguém, e condição inverificável não é condição — o mesmo padrão do **I9** (*garantia
+   inauditável não é garantia*).
+4. **Prazo-teto.** Um aviso que nunca teve ocorrência governável a remover encerra ao fim da
+   **Sprint seguinte** à ratificação da descontinuação. Vale o que vier primeiro.
+5. **Morre calado.** O aviso sai na **mesma mudança** que remove a última ocorrência governável, e
+   **nenhum registro novo é exigido**: o log carrega o fato, o commit carrega a data. Registrar o
+   fim de um eco duplicaria em log aquilo que o log já tem.
+
+Quem lê o README depois do encerramento — e ainda tem o artefato antigo no diretório de trabalho —
+é atendido pelo log: datado, selado e pesquisável. Foi exatamente o que o **ADR-0001 §3** fez por
+`c2_on_time.csv`.
+
+#### Aplicação inaugural
+
+O caso que originou a regra é resolvido **por aplicação dela**, não por juízo pontual: nenhum
+comando, código, teste ou artefato versionado do ecossistema referencia `c2_on_time.csv`
+(`output/` é ignorado pelo Git nos repos de produto, e o `self_test.py` migrou pela propagação do
+ADR-0001 §5). A condição de encerramento já estava satisfeita — a nota sai do `api/README.md`, e
+o ADR-0001 §3 permanece como a resposta para quem ainda tem o arquivo na máquina.
+
+> A GOV-004 **não é reaberta.** O item que ela classificou como *E — incerto* passa a ser
+> decidido pela regra que faltava; o restante da auditoria permanece como foi encerrado.
 
 ---
 
@@ -202,6 +259,9 @@ Regras que, se violadas, indicam que a documentação parou de funcionar como si
 - **I9** — Toda **evidência de reconciliação** possui **instrumento versionado, reproduzível e
   independente do código auditado**. Número registrado sem instrumento é afirmação, não evidência.
   Ver **I9.1** para como isso opera.
+- **I10** — Todo **aviso de descontinuação** em documento derivado nasce **datado**, com
+  **condição de encerramento explícita** e com **registro permanente em log** atrás dele. Aviso sem
+  condição de encerramento não pode ser julgado obsoleto — e por isso nunca o é. Ver **§5.1**.
 
 ### I4.1 — Selo no estado final (ratificado 2026-08-31, Issue GOV-006 item 3)
 
