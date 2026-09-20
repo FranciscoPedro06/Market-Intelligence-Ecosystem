@@ -4,7 +4,8 @@
 > Qualquer engenheiro ou IA deve conseguir se orientar lendo apenas a documentação — sem depender do histórico de conversas.
 > **Princípio 5:** a documentação é a única fonte oficial de conhecimento.
 
----
+
+
 
 ## Como ler esta documentação
 
