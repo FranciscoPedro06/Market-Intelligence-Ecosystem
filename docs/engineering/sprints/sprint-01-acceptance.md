@@ -172,3 +172,56 @@ que foi *verificado então* — e nada do que foi verificado deixou de valer. Um
 ser reaberto a cada emenda de contrato não seria um aceite.
 
 *(Fecha **GOV-001**.)*
+
+---
+
+# Adendo B — o follow-up 3 (C3) é estreitado, não fechado
+
+- **Data:** 2026-09-20 · **Autor:** Sprint Lead
+- **Forma:** adendo, conforme `documentation-architecture.md` §2.1 e §7 → I4.1. O corpo (§§1–6) e o
+  **Adendo A** permanecem intactos — o Adendo A está selado desde a sua publicação em 2026-08-31 e
+  nada nele foi reescrito.
+- **Instrumento:** **ADR-0003** (Issue **GOV-009**), aceito em 2026-09-20.
+
+## B.1 O que mudou
+
+O §6 registrou como follow-up 3: *"**C3 formal:** a API entrega um rascunho `C3-draft v0.1.0`
+(per-direção + `--combine`). **Congelar C3 quando o consumidor validar a forma da resposta.**"*
+O Adendo A.2 o classificou, em 2026-08-31, como *"ainda aberto — Fase 1"*.
+
+Em 2026-09-20 o **ADR-0003** congelou o **núcleo normativo** do C3 como **`v1.0.0`**, com sede em
+`contracts.md` §C3.
+
+| Seção | O que o registro afirma | Verdade em 2026-09-20 | Instrumento |
+|---|---|---|---|
+| §6 follow-up 3 | `C3-draft v0.1.0`, a congelar | **C3 `v1.0.0`** — núcleo normativo congelado | ADR-0003 |
+| Adendo A.2 | *"ainda aberto — Fase 1"* | **parcialmente aberto** — ver B.2 | ADR-0003 §3.3 |
+
+## B.2 Por que "estreitado" e não "fechado"
+
+**A condição escrita no §6 não foi satisfeita: continua não existindo consumidor.** O ADR-0003
+não fingiu o contrário — congelou apenas o que **deriva de autoridade já ratificada** (RT5,
+`pontualidade v1.1.0`, *nulos nunca inventados*, ADR-0002) e, por isso, não precisava de
+consumidor para ser validado:
+
+- ✅ **Fechado:** auto-descrição, fronteira verbatim × derivado, proveniência obrigatória,
+  semântica de recusa, nulos e avisos — as garantias G1–G6.
+- 🕓 **Aberto:** protocolo de transporte, superfície de endpoints, ergonomia (inclusive a divisão
+  `answer` × `answers`), paginação. **É esta parte que espera o consumidor.**
+
+O gatilho que motivou agir antes do consumidor **não** foi o follow-up: foi uma violação de
+**I7** — o `market-intelligence-api` definia, versionava, publicava e testava um contrato
+compartilhado sozinho, enquanto `contracts.md` dizia *"a definir"* (ADR-0003 §1.1).
+
+## B.3 O que **não** mudou
+
+- **Nenhum número se moveu.** O ADR-0003 alterou duas chaves de envelope da resposta
+  (`response_contract`/`response_version` → `contract`/`contract_version`); medidas, contadores,
+  proveniência e a ordenação são idênticos.
+- **A triangulação do §3 permanece exata** e o **AC4 continua provado pela mesma evidência** —
+  reconferida no Adendo A.4 e não tocada aqui.
+- **A Sprint 1 permanece aceita.** Como no Adendo A: este adendo corrige o que o registro *afirma
+  hoje*, não o que foi *verificado então*.
+
+*(Não fecha o follow-up 3; **estreita-o** para "validar a ergonomia e congelar a superfície".
+Fecha **GOV-009**.)*

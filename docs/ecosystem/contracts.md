@@ -11,7 +11,7 @@ Legenda de status: 🔒 congelado/versionado · 🧪 validado (fonte externa) ·
 | **C0** | Fonte ANAC/VRA → Collector | 🧪 validado na Fase 0 (Sprint 1) |
 | **C1** | Collector → Analytics | 🔒 `v1.0.0` |
 | **C2** | Analytics → API | 🔒 `v1.2.0` |
-| **C3** | API → Consumidor | 🕓 Fase 1 |
+| **C3** | API → Consumidor | 🔒 `v1.0.0` — núcleo normativo (protocolo e superfície 🕓) |
 
 ---
 
@@ -115,7 +115,7 @@ Contrato **externo** (não controlamos). Validado por spike contra o dado real (
 |---|---|---|
 | `flights_operated` | integer (≥0) | **Denominador.** `flight_status = REALIZADO` **E** `actual_arrival` não nulo **E** `scheduled_arrival` não nulo. *(v1.1.0: passou a exigir também `scheduled_arrival` — sem previsão, a pontualidade é indefinida.)* |
 | `flights_on_time` | integer (≥0) | **Numerador.** Subconjunto com `(actual_arrival − scheduled_arrival) ≤ 15 min` (antecipado = pontual; +15 inclusivo). |
-| `on_time_rate` | decimal[0,1] (nullable) | `flights_on_time / flights_operated`. **`null` quando denominador = 0** (nunca 0/0). Fração, não percentual; precisão plena (arredondamento é do C3). |
+| `on_time_rate` | decimal[0,1] (nullable) | `flights_on_time / flights_operated`. **`null` quando denominador = 0** (nunca 0/0). Fração, não percentual; **precisão plena** — nem o C2 nem o C3 arredondam; arredondar é de quem exibe (C3 §*Nota de escopo*). |
 | `flights_cancelled` | integer (≥0) | Transparência: `CANCELADO`. Fora do denominador (fora de escopo), nunca descartado. |
 | `flights_not_reported` | integer (≥0) | Transparência: `NÃO INFORMADO`. Fora do denominador. |
 | `flights_operated_missing_arrival` | integer (≥0) | Transparência: `REALIZADO` sem `actual_arrival`. Dado ausente explícito. |
@@ -237,9 +237,132 @@ campos, tipos, garantias, a **identidade do artefato** e a **forma do documento*
 e nada além disso — em particular, não diz *onde* o artefato é persistido nem *por qual
 tecnologia* é produzido.
 
-## C3 — API → Consumidor · 🕓 Fase 1
+## C3 — API → Consumidor · 🔒 `v1.0.0` (núcleo normativo congelado 2026-09-20)
 
-Perguntas por rota e a comparação de pontualidade entre companhias devolvida. A definir na Fase 1.
+> Esquema do **documento de resposta** que a API devolve ao consumidor: a comparação de
+> pontualidade entre companhias numa rota, por mês, e a resposta à pergunta-âncora.
+> **Princípio (RT5, na fronteira de saída):** a API **não** calcula nada. O C3 transporta os
+> números do C2 verbatim e rotula explicitamente o pouco que deriva deles.
+> **Escopo desta versão:** o **núcleo normativo** — ver *Nota de escopo* ao final da seção.
+> **Origem:** rascunho `C3-draft v0.1.0` servido desde a Sprint 1, promovido a contrato pelo
+> ADR-0003 (o rascunho vivia no `api/README.md`, o que violava **I7**).
+
+### Grão e identidade
+- **Grão:** um documento de resposta por **(par de rota) × (filtro de mês, opcional)**.
+- O par de rota é **não-direcional** (`CGH-SDU`), aceito em IATA ou ICAO, em qualquer ordem.
+  Dentro dele, os registros C2 direcionais são apresentados de um de dois modos, sempre declarado
+  no campo `aggregation`:
+
+| `aggregation` | Modo | O que faz |
+|---|---|---|
+| `none-per-direction` | **padrão** | Apresenta cada direção separadamente. Não agrega nada. |
+| `count-sum` | opcional | Soma os **contadores** das duas direções por companhia e reexpressa a razão a partir dessas somas. **Agregação pura de inteiros do C2** — nunca reaplicação da métrica. |
+
+- Por que o padrão é por direção: a pontualidade é medida na **chegada ao destino**, então
+  misturar CGH→SDU com SDU→CGH conflaria duas operações — a mesma razão que faz o grão do C2 ser
+  direcional.
+
+### Forma do documento
+
+**Forma canônica** (`v1.0.0`): objeto com envelope, seguindo a **mesma convenção do C2**
+(ADR-0002).
+
+```json
+{
+  "contract": "C3",
+  "contract_version": "v1.0.0",
+  "query":      { "route_pair": "CGH-SDU", "month": "2023-06", "combine_directions": true },
+  "validation": { "status": "pass", "c2_declared_version": "v1.2.0" },
+  "provenance": { "metric_id": "pontualidade", "metric_version": "v1.1.0" },
+  "months":     [ { "reference_month": "2023-06", "aggregation": "count-sum" } ],
+  "warnings":   []
+}
+```
+
+| Campo de topo | Tipo | Propósito |
+|---|---|---|
+| `contract` | string | O documento declara **qual** contrato carrega — sempre `C3`. |
+| `contract_version` | string | O documento declara **qual versão** carrega — com prefixo `v`, como no C2. |
+| `query` | objeto | O pedido **como foi interpretado**: par normalizado, par requisitado, família de códigos, mês, modo. |
+| `validation` | objeto | Resultado do gate do contrato **de entrada** (C2) — ver **G3**. Um documento servido **sempre** o carrega; sem relatório de validação não há resposta a servir (na API: `503`). |
+| `provenance` | objeto | Proveniência da métrica e linhagem das fontes — ver **G3**. |
+| `months` | array\<objeto\> | Um bloco por mês de referência, cada um com `aggregation` e a comparação. |
+| `warnings` | array\<string\> | Degradações visíveis — ver **G6**. Vazio significa "nada a declarar". |
+
+### Garantias
+
+As seis garantias abaixo são o que o C3 `v1.0.0` **congela**. Nenhuma é preferência de desenho:
+cada uma deriva de regra já ratificada a montante.
+
+- **G1 — Auto-descrição.** Toda resposta declara `contract` e `contract_version`. Um consumidor
+  sabe o que recebeu sem consultar a versão do produto que serviu. *(ADR-0002.)*
+- **G2 — Verbatim × derivado.** `on_time_rate`, `flights_operated`, `flights_on_time` e os **5**
+  contadores de transparência saem do C2 **sem recálculo, sem arredondamento e sem reescrita de
+  tipo**. O conjunto de campos derivados é **fechado** nesta versão, e cada um é rotulado:
+
+  | Derivado | O que é | O que **não** é |
+  |---|---|---|
+  | `rank` e a ordenação melhor→pior | ordenação do `on_time_rate` do C2 | regra de métrica |
+  | `answer` / `answers` | leitura da ordenação | cálculo novo |
+  | `rate_gap_vs_runner_up` | subtração de dois valores do C2, para exibição | medida do C2 |
+  | taxa sob `aggregation: count-sum` | razão de duas somas de inteiros do C2 | reaplicação da janela de 15 min |
+
+  *(RT5 — `engineering-execution-plan.md`.)*
+- **G3 — Proveniência obrigatória.** Toda resposta carrega `provenance` (`metric_id`,
+  `metric_version`, `metric_definition_source`, `on_time_basis`, `on_time_threshold_minutes`,
+  `c1_contract_version`, `c2_contract_version`, `source_lineage`) e `validation`. **Um número sem
+  a versão da métrica que o produziu não é comparável** — servir um sem o outro não é resposta
+  incompleta, é resposta inútil. *(AC4.)*
+- **G4 — Recusa explícita.** A resposta **declara** a resposta-âncora ou **recusa-se a
+  respondê-la**; jamais a fabrica. `conclusive` (booleano) é obrigatório em todo bloco de
+  resposta:
+
+  | Situação | O que o C3 devolve |
+  |---|---|
+  | Um líder claro | `most_reliable`, `runner_up`, `rate_gap_vs_runner_up`, `conclusive: true` |
+  | `on_time_rate` nulo (denominador 0) | companhia **excluída** e listada em `excluded_no_denominator` — ausência de medição não é um nível de confiabilidade |
+  | Empate exato no `on_time_rate` | `most_reliable: null` + `tie: [...]` + `conclusive: false` — o C2 não oferece critério de desempate, e criar um seria regra de negócio |
+  | Menos de 2 companhias comparáveis | `conclusive: false` — o AC3 pede uma *comparação* |
+  | Todas as taxas nulas | `most_reliable: null`, `conclusive: false` |
+
+  O empate é aferido por **igualdade exata** da fração do C2: uma tolerância seria regra de
+  negócio, e regra de negócio pertence ao Analytics. *(AC3 · *nulos nunca inventados*.)*
+- **G5 — Nulos nunca inventados.** `on_time_rate = null` é servido **nulo**, nunca `0` — `0`
+  afirmaria 0% de pontualidade, que é um fato que a fonte não sustenta. Um contador **ausente**
+  numa versão anterior do C2 é servido `null`, nunca `0` — inclusive ao somar direções, onde
+  somar ausências não fabrica um zero. *(`pontualidade v1.1.0`.)*
+- **G6 — Avisos visíveis.** Insumo sintético, registro posto em quarentena pela validação do C2 e
+  publicação de documento em versão legada aparecem em `warnings`. **O silêncio é o que se
+  proíbe** — não a degradação. *(GOV-005.)*
+
+### Campos informativos
+
+Campos não listados acima são **informativos**: podem mudar de texto sem emenda de contrato.
+Hoje são dois, ambos em prosa: `_value_source` (nas entradas por direção) e `on_time_rate_note`
+(nas entradas combinadas). A assimetria é **correta**: uma entrada combinada não é verbatim, então
+afirmar `_value_source` nela seria falso.
+
+> Ratificado pelo **ADR-0003** (Issue **GOV-009**, 2026-09-20).
+
+### Nota de escopo
+
+Este contrato descreve o **documento de resposta** — envelope, campos, tipos e as garantias
+acima — **e nada além disso**. Permanecem **adiados** (`engineering-execution-plan.md` §7,
+*"Protocolo e formato da API"*, hoje **parcialmente** decidida):
+
+- **protocolo de transporte** (HTTP, CLI, arquivo) e **superfície de endpoints** — URLs,
+  *status codes*, cabeçalhos;
+- **ergonomia** de nomes e aninhamento, inclusive a divisão `answer` × `answers`;
+- **paginação e filtros** além de par de rota + mês.
+
+Essas escolhas vivem hoje no `market-intelligence-api/README.md` e só serão congeladas quando
+houver **consumidor real** para validá-las — a condição que o `sprint-01-acceptance.md` §6
+registrou e que **continua não satisfeita**. Congelar agora o que nenhum consumidor exercitou
+repetiria o risco que o ADR-0002 §4 deixou registrado.
+
+**Arredondamento não é do C3.** O documento transporta o `on_time_rate` em precisão plena do C2
+(G2); formatar `86.75%` é apresentação, e apresentação é de quem exibe. O renderizador de texto
+da CLI é **um consumidor do C3**, não parte dele.
 
 ---
 
@@ -253,3 +376,4 @@ Perguntas por rota e a comparação de pontualidade entre companhias devolvida. 
 | C2 | `v1.1.0` | 2026-07-25 | Emenda aditiva (CCR do Analytics): denominador passa a exigir `scheduled_arrival`; novo contador de transparência `flights_operated_missing_schedule`; `flights_source_total` inclui o novo bucket. Aplica `pontualidade v1.1.0`. Compatível: nenhum campo removido/renomeado. |
 | C2 | `v1.1.0` | 2026-07-26 | **Revisão documental, sem mudança de esquema** (versão inalterada): nova seção *Artefato de referência* fixando `c2_punctuality.json` como identidade do contrato. Ratificado pelo ADR-0001 / GOV-002. Nenhum campo, tipo ou garantia alterado. |
 | C2 | `v1.2.0` | 2026-08-31 | **Emenda aditiva no nível do documento** (ADR-0002 / GOV-003): o artefato passa a carregar o envelope `{contract, contract_version, records[]}`, tornando-se auto-descritivo. **Esquema do registro inalterado** em relação a `v1.1.0` — nenhum campo, tipo, medida ou garantia de registro mudou, e `metric_version` segue `v1.1.0`. Array JSON puro tolerado como forma legada. Compatível: um documento `v1.0.0`/`v1.1.0` continua servível. |
+| C3 | `v1.0.0` | 2026-09-20 | **Congelamento inicial do núcleo normativo** do documento de resposta (ADR-0003 / GOV-009): envelope `{contract, contract_version, …}` alinhado à convenção do C2, fronteira verbatim × derivado, proveniência obrigatória, semântica de recusa, nulos e avisos (G1–G6). Promove o rascunho `C3-draft v0.1.0`, que vivia no `api/README.md` — **violação de I7** encerrada. **Protocolo, superfície de endpoints e ergonomia permanecem adiados** (ver *Nota de escopo*). |

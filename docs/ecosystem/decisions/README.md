@@ -41,6 +41,7 @@ o que dá valor ao ADR. Depois do selo, uma reversão gera um **novo** ADR com `
 |---|---|---|---|---|
 | [0001](0001-artefato-canonico-c2.md) | Artefato canônico do C2 | ✅ **Aceito** | 2026-07-26 | *Formato dos conjuntos de dados intermediários* (parcial: identidade) |
 | [0002](0002-envelope-documento-c2.md) | Envelope do documento C2 | ✅ **Aceito** | 2026-08-31 | *Formato dos conjuntos de dados intermediários* (fecha a decisão: forma do documento) |
+| [0003](0003-nucleo-normativo-c3.md) | Núcleo normativo do C3 | ✅ **Aceito** | 2026-09-20 | *Protocolo e formato da API* (parcial: formato do documento de resposta; protocolo e superfície seguem adiados) |
 
 Legenda: 🟡 Proposto (aguarda Sprint Lead) · ✅ Aceito · ❌ Rejeitado · ⛔ Superado por outro ADR.
 

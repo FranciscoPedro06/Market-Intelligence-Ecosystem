@@ -138,7 +138,12 @@ Adiar aqui é disciplina, não preguiça. Nenhuma destas aproxima o MVP hoje.
   deferidos** — o contrato diz o que o documento é, não onde ele mora nem com que tecnologia é
   produzido.
 - ⏳ **Orquestração / agendamento** da cadeia.
-- ⏳ **Protocolo e formato da API** além de "responde à pergunta por rota".
+- 🟡 **Protocolo e formato da API** além de "responde à pergunta por rota" — **parcialmente
+  decidida** (2026-09-20). O **formato do documento de resposta** foi decidido pelo **ADR-0003**
+  (aceito 2026-09-20): o **C3 `v1.0.0`** congela envelope, fronteira verbatim × derivado,
+  proveniência obrigatória, semântica de recusa, nulos e avisos — e vive em `contracts.md` §C3.
+  **Protocolo de transporte, superfície de endpoints e ergonomia permanecem adiados**, porque
+  nenhuma autoridade a montante os determina e ainda **não existe consumidor** que os valide.
 - ⏳ **Estratégia de carga histórica** (full vs. incremental) e escala de volume.
 - ⏳ **Qualquer camada de BI/visualização** (fora do MVP pela Discovery).
 - ⏳ **Múltiplas fontes** (preço, demanda) — são v2.
