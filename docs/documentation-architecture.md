@@ -8,44 +8,56 @@
 
 ## 1. Estrutura completa de pastas
 
+> **`<raiz-de-clones>`** é o diretório que contém os **cinco repositórios Git independentes** do
+> ecossistema, clonados **lado a lado**. Não é versionado, não tem nome fixo, e **nenhum documento
+> depende do caminho que ele tem em cada máquina** — é sempre referido por este papel. Comandos
+> operacionais documentados que dependem da disposição dos cinco repositórios declaram, quando
+> aplicável, que devem ser executados a partir da `<raiz-de-clones>`.
+>
+> **Atenção ao nome.** `Market-Intelligence-Ecosystem` designa **duas coisas**: o *ecossistema*
+> (os cinco repositórios) e **um** deles — o repositório de governança, que contém apenas `docs/`.
+> Nesta árvore o nome aparece no **segundo** sentido.
+
 ```
-Market-Intelligence-Ecosystem/
-├── docs/                                     # governança do ecossistema (fonte oficial)
-│   ├── README.md                             # índice / porta de entrada
-│   ├── documentation-architecture.md         # ESTE documento (o sistema da doc)
-│   │
-│   ├── ecosystem/                            # camada 1 — vale para tudo
-│   │   ├── vision.md
-│   │   ├── principles.md
-│   │   ├── glossary.md
-│   │   ├── contracts.md                      # contratos de dados C0–C3
-│   │   └── decisions/                        # ADRs (log append-only)
-│   │       ├── README.md                     # índice de ADRs + template
-│   │       └── NNNN-<titulo>.md              # 1 decisão por arquivo, imutável
-│   │
-│   ├── engineering/                          # camada-ponte — traduz produto em execução
-│   │   ├── engineering-execution-plan.md
-│   │   ├── spikes/                           # resultados de spikes (log append-only)
-│   │   │   ├── README.md
-│   │   │   └── <data>-<premissa>.md
-│   │   └── sprints/                          # execução por Sprint (camada-ponte)
-│   │       ├── sprint-NN-<nome>.md           # PLANO da Sprint (derivado; editável)
-│   │       └── sprint-NN-acceptance.md       # ACEITE da Sprint (log append-only; adendos)
-│   │
-│   └── product/                              # camada 2 — a visão do produto
-│       ├── product-discovery.md
-│       ├── roadmap.md
-│       └── metrics-definitions.md
+<raiz-de-clones>/
 │
-├── market-intelligence-collector/            # camada 3 — repo se documenta
+├── Market-Intelligence-Ecosystem/                # 1/5 — governança do ecossistema (fonte oficial)
+│   └── docs/
+│       ├── README.md                             # índice / porta de entrada
+│       ├── documentation-architecture.md         # ESTE documento (o sistema da doc)
+│       │
+│       ├── ecosystem/                            # camada 1 — vale para tudo
+│       │   ├── vision.md
+│       │   ├── principles.md
+│       │   ├── glossary.md
+│       │   ├── contracts.md                      # contratos de dados C0–C3
+│       │   └── decisions/                        # ADRs (log append-only)
+│       │       ├── README.md                     # índice de ADRs + template
+│       │       └── NNNN-<titulo>.md              # 1 decisão por arquivo, imutável
+│       │
+│       ├── engineering/                          # camada-ponte — traduz produto em execução
+│       │   ├── engineering-execution-plan.md
+│       │   ├── spikes/                           # resultados de spikes (log append-only)
+│       │   │   ├── README.md
+│       │   │   └── <data>-<premissa>.md
+│       │   └── sprints/                          # execução por Sprint (camada-ponte)
+│       │       ├── sprint-NN-<nome>.md           # PLANO da Sprint (derivado; editável)
+│       │       └── sprint-NN-acceptance.md       # ACEITE da Sprint (log append-only; adendos)
+│       │
+│       └── product/                              # camada 2 — a visão do produto
+│           ├── product-discovery.md
+│           ├── roadmap.md
+│           └── metrics-definitions.md
+│
+├── market-intelligence-collector/                # 2/5 — camada 3 — repo se documenta
 │   └── README.md
-├── market-intelligence-api/
+├── market-intelligence-api/                      # 3/5
 │   └── README.md
-├── market-intelligence-analytics/
+├── market-intelligence-analytics/                # 4/5
 │   └── README.md
-└── market-intelligence-audit/                # instrumento de auditoria (NÃO é produto)
-    ├── README.md                             # fora da cadeia de valor; ver I9.1
-    └── REPRODUCTIONS.md                      # log append-only de reproduções
+└── market-intelligence-audit/                    # 5/5 — instrumento de auditoria (NÃO é produto)
+    ├── README.md                                 # fora da cadeia de valor; ver I9.1
+    └── REPRODUCTIONS.md                          # log append-only de reproduções
 ```
 
 ---
@@ -315,6 +327,8 @@ o código auditado é o que compromete**.
 #### Como são executados
 
 ```bash
+# Cada bloco roda a partir da <raiz-de-clones> (§1) — nunca de dentro do repo de governança.
+
 # A — recontagem independente (e comparação opcional contra o C2)
 cd market-intelligence-analytics && python tests/reconcile_independent.py \
     --c1 input/c1_flights.csv --c2 output/c2_punctuality.json
