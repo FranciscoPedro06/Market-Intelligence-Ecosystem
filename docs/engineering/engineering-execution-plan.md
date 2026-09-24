@@ -74,6 +74,12 @@ O ecossistema é uma **cadeia de valor linear e unidirecional**:
 - **Collector depende de uma fonte externa** que não controlamos — a dependência mais frágil de todas.
 - Não há dependência reversa. Isso é intencional: mantém o Walking Skeleton fino e cada produto substituível.
 
+> **Sprint 2 — o nó "Consumidor".** Para a validação do C3, esse nó é materializado pelo
+> `market-intelligence-c3-client`, **cliente de referência do C3** (`documentation-architecture.md`
+> §1). Ele consome a API **exclusivamente por HTTP** e fica **fora** da cadeia produtora: nenhum dos
+> três produtos depende dele, e ele não depende do Collector, do Analytics nem do Audit. A direção
+> da cadeia e a ausência de dependência reversa não mudam.
+
 > **Não** está definido — e não precisa estar agora — se essa cadeia roda como serviços separados, como um único processo, ou de forma agendada. Isso é decisão adiável (seção 7).
 
 ---

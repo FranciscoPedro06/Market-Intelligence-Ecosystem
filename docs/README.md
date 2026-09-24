@@ -65,6 +65,11 @@ Legenda de status: ✅ existe · 🕓 a criar quando houver conteúdo real (nunc
 | `market-intelligence-audit/REPRODUCTIONS.md` — log de reproduções de evidência | ✅ | Sprint Lead |
 | `market-intelligence-analytics/tests/reconcile_independent.py` — recontador independente | ✅ | Eng. do repo |
 
+### Cliente de referência (consumidor do C3 — fora da cadeia de produção)
+| Documento | Status | Responsável |
+|---|---|---|
+| `market-intelligence-c3-client/README.md` — cliente de referência do C3: consome a API **só por HTTP**; não é produto nem auditoria (Sprint 2 · `documentation-architecture.md` §1) | 🕓 | Eng. do repo |
+
 ---
 
 ## Regras de governança da documentação

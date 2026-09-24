@@ -8,20 +8,29 @@
 
 ## 1. Estrutura completa de pastas
 
-> **`<raiz-de-clones>`** é o diretório que contém os **cinco repositórios Git independentes** do
+> **`<raiz-de-clones>`** é o diretório que contém os **seis repositórios Git independentes** do
 > ecossistema, clonados **lado a lado**. Não é versionado, não tem nome fixo, e **nenhum documento
 > depende do caminho que ele tem em cada máquina** — é sempre referido por este papel. Comandos
-> operacionais documentados que dependem da disposição dos cinco repositórios declaram, quando
+> operacionais documentados que dependem da disposição dos seis repositórios declaram, quando
 > aplicável, que devem ser executados a partir da `<raiz-de-clones>`.
 >
 > **Atenção ao nome.** `Market-Intelligence-Ecosystem` designa **duas coisas**: o *ecossistema*
-> (os cinco repositórios) e **um** deles — o repositório de governança, que contém apenas `docs/`.
+> (os seis repositórios) e **um** deles — o repositório de governança, que contém apenas `docs/`.
 > Nesta árvore o nome aparece no **segundo** sentido.
+>
+> **O sexto repositório — decisão da Sprint 2.** `market-intelligence-c3-client` é o **cliente de
+> referência do C3**: materializa o nó **Consumidor** que a cadeia já tinha
+> (`engineering-execution-plan.md` §3) e existe para validar a interface C3 como um consumidor
+> externo a validaria. **Não** é produto de negócio, **não** é instrumento de auditoria, **não** é
+> extensão da API nem módulo do Analytics — e **não** entra na cadeia produtora, que continua
+> `Collector → Analytics → API → Consumidor`. Sua única dependência de produção é
+> **cliente → HTTP → API**: não importa código da API, do Analytics, do Collector nem do Audit, e
+> não lê C1/C2 diretamente. Enquanto não for criado, figura na árvore como 🕓.
 
 ```
 <raiz-de-clones>/
 │
-├── Market-Intelligence-Ecosystem/                # 1/5 — governança do ecossistema (fonte oficial)
+├── Market-Intelligence-Ecosystem/                # 1/6 — governança do ecossistema (fonte oficial)
 │   └── docs/
 │       ├── README.md                             # índice / porta de entrada
 │       ├── documentation-architecture.md         # ESTE documento (o sistema da doc)
@@ -49,15 +58,17 @@
 │           ├── roadmap.md
 │           └── metrics-definitions.md
 │
-├── market-intelligence-collector/                # 2/5 — camada 3 — repo se documenta
+├── market-intelligence-collector/                # 2/6 — camada 3 — repo se documenta
 │   └── README.md
-├── market-intelligence-api/                      # 3/5
+├── market-intelligence-api/                      # 3/6
 │   └── README.md
-├── market-intelligence-analytics/                # 4/5
+├── market-intelligence-analytics/                # 4/6
 │   └── README.md
-└── market-intelligence-audit/                    # 5/5 — instrumento de auditoria (NÃO é produto)
-    ├── README.md                                 # fora da cadeia de valor; ver I9.1
-    └── REPRODUCTIONS.md                          # log append-only de reproduções
+├── market-intelligence-audit/                    # 5/6 — instrumento de auditoria (NÃO é produto)
+│   ├── README.md                                 # fora da cadeia de valor; ver I9.1
+│   └── REPRODUCTIONS.md                          # log append-only de reproduções
+└── market-intelligence-c3-client/                # 6/6 — cliente de referência do C3 (consumidor; 🕓 a criar)
+    └── README.md                                 # NÃO é produto nem auditoria; só HTTP → API
 ```
 
 ---
