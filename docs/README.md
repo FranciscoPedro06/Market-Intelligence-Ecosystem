@@ -68,7 +68,8 @@ Legenda de status: ✅ existe · 🕓 a criar quando houver conteúdo real (nunc
 ### Cliente de referência (consumidor do C3 — fora da cadeia de produção)
 | Documento | Status | Responsável |
 |---|---|---|
-| `market-intelligence-c3-client/README.md` — cliente de referência do C3: consome a API **só por HTTP**; não é produto nem auditoria (Sprint 2 · `documentation-architecture.md` §1) | 🕓 | Eng. do repo |
+| `market-intelligence-c3-client/README.md` — cliente de referência do C3: consome a API **só por HTTP**; não é produto nem auditoria (Sprint 2 · `documentation-architecture.md` §1) | ✅ | Eng. do repo |
+| `market-intelligence-c3-client/docs/friction-register.md` — log de fricções do primeiro consumo externo do C3 (evidência do follow-up 3) | ✅ | Eng. do repo |
 
 ---
 

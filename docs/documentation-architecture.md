@@ -25,7 +25,7 @@
 > extensão da API nem módulo do Analytics — e **não** entra na cadeia produtora, que continua
 > `Collector → Analytics → API → Consumidor`. Sua única dependência de produção é
 > **cliente → HTTP → API**: não importa código da API, do Analytics, do Collector nem do Audit, e
-> não lê C1/C2 diretamente. Enquanto não for criado, figura na árvore como 🕓.
+> não lê C1/C2 diretamente.
 
 ```
 <raiz-de-clones>/
@@ -67,8 +67,9 @@
 ├── market-intelligence-audit/                    # 5/6 — instrumento de auditoria (NÃO é produto)
 │   ├── README.md                                 # fora da cadeia de valor; ver I9.1
 │   └── REPRODUCTIONS.md                          # log append-only de reproduções
-└── market-intelligence-c3-client/                # 6/6 — cliente de referência do C3 (consumidor; 🕓 a criar)
-    └── README.md                                 # NÃO é produto nem auditoria; só HTTP → API
+└── market-intelligence-c3-client/                # 6/6 — cliente de referência do C3 (consumidor)
+    ├── README.md                                 # NÃO é produto nem auditoria; só HTTP → API
+    └── docs/friction-register.md                 # log de fricções do consumo do C3
 ```
 
 ---
@@ -179,7 +180,7 @@ Quando um documento muda, ele **força a revisão** dos que dependem dele (a jus
 | `product-discovery.md` | metrics-definitions, roadmap, engineering-execution-plan. |
 | `metrics-definitions.md` | contracts (C2) → analytics/README, api/README → **registros de sprint que citam a versão alterada** (por adendo). |
 | `engineering-execution-plan.md` | contracts, ADRs, todos os `<repo>/README`, planos de Sprint abertos. |
-| `contracts.md` | os `<repo>/README` dos produtos afetados (versionar o contrato) → **registros de sprint que citam a versão alterada** (por adendo). |
+| `contracts.md` | os `<repo>/README` dos produtos afetados (versionar o contrato) — e, quando o **C3** muda, o `market-intelligence-c3-client/README.md` — → **registros de sprint que citam a versão alterada** (por adendo). |
 | `<repo>/README.md` | ninguém a jusante (é folha do grafo). |
 | **Qualquer doc criado/movido/removido** | `docs/README.md` (índice) — **obrigatório**. |
 | **Uma decisão adiável é tomada** | novo ADR em `decisions/` + marcar como decidida na seção 7 do engineering-execution-plan. |
